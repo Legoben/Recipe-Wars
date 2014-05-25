@@ -128,7 +128,7 @@ class SocketHandler(websocket.WebSocketHandler):
             round = self.makeRound()
             game['currentround'] = round
 
-            self.write_message('{"event":"startround", "data" : {"roundnum": 0, "set": '+json.dumps(round)+'}}')
+            self.write_message('{"event":"startgame", "data" : {"roundnum": 0, "set": '+json.dumps(round)+'}}')
             oppinfo['socket'].write_message('{"event":"startgame", "data" : {"roundnum": 0, "set": '+json.dumps(round)+'}}')
             
 

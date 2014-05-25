@@ -168,7 +168,17 @@ ws.onmessage = function (evt) {
     } else if (json.event == "startgame"){
         $('#question').text('Starting Game...');
         setTimeout(function(){
+            $('#question').text(json.data.set.recipe.name + ':');
+            $('#food-img').attr('src', json.data.set.recipe.image);
+            
+            setTimeout(function(){
+                for (var i = 0; i < json.data.set.inglist.length; i++) { 
+                    $('#anslist').append('<span class="list-group-item ansitem"><span><i class="fa fa-check fa-2x"></i></span><span class="ingredient" id="ingredient_0">'+json.data.set.inglist[i]+'</span><span><i class="fa fa-times fa-2x"></i></span></span>');
+                }
                 
+            }, 3000)
+            
+            console.log(json.data);
         }, 3000)
         
     } else if (json.event == "oppleft"){
@@ -207,7 +217,7 @@ ws.onclose = function () {
 
 <hr>
 
-<div id="question">What are the ingrediants of <span id="food-name">Food Name</span>?</div>
+<div id="question">What are the ingrediants of Food Name?</div>
 
 <img id="food-img" />
 
