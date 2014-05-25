@@ -116,6 +116,7 @@
         overflow-y: scroll;
         margin: 0 auto;
         margin-top: 20px;
+        display: none;
     }
     
     .ansitem{
@@ -145,9 +146,11 @@
 <script>
 var cid = "{{cid}}"
 var username = "Guest"
-var gamenum, playernum    
+var gamenum, playernum, timeleft, roundnum
+var timer = false;
+var finished = false;
 
-var ws = new WebSocket("ws://localhost:9008/ws?c=" + cid);
+var ws = new WebSocket("ws:/192.168.1.35:9008/ws?c=" + cid);
 ws.onopen = function () {
     console.log('In!')
 };
@@ -166,32 +169,97 @@ ws.onmessage = function (evt) {
         $('#user2 div.user-img img').attr('src', json.data.userpic)
         
     } else if (json.event == "startgame"){
-        $('#question').text('Starting Game...');
+        roundnum = json.data.roundnum;
+        $('#question').text('Round '+(json.data.roundnum + 1) + ':');
         setTimeout(function(){
             $('#question').text(json.data.set.recipe.name + ':');
             $('#food-img').attr('src', json.data.set.recipe.image);
             
             setTimeout(function(){
                 for (var i = 0; i < json.data.set.inglist.length; i++) { 
-                    $('#anslist').append('<span class="list-group-item ansitem"><span><i class="fa fa-check fa-2x"></i></span><span class="ingredient" id="ingredient_0">'+json.data.set.inglist[i]+'</span><span><i class="fa fa-times fa-2x"></i></span></span>');
+                    $('#anslist').append('<span class="list-group-item ansitem ans_'+i+'"><span onclick="sendtrue(\''+json.data.set.inglist[i]+'\', '+i+')"><i class="fa fa-check fa-2x"></i></span><span class="ingredient" >'+json.data.set.inglist[i]+'</span><span onclick="sendfalse(\''+json.data.set.inglist[i]+'\', '+i+')"><i class="fa fa-times fa-2x"></i></span></span>');
                 }
+                $('#anslist').fadeIn();
                 
-            }, 3000)
+                setupTimer();
+                
+            }, 1000)
             
             console.log(json.data);
         }, 3000)
         
     } else if (json.event == "oppleft"){
         $('#user2 div.user-info span:nth-child(1)').text('Disconnected...')
-        $('#user2 div.user-img img').attr('src', '') //Replace with defualt picture
+        if(!finished){
+            document.location.reload();
+        }
         
+    } else if (json.event == "youanswer") {
+        
+        $('#user1 .user-info span:nth-child(2)').text(json.score)
+        /*if(json.correct){
+            
+        } else {
+            
+        }*/
+    } else if (json.event == "finishgame") {
+        if(parseInt($('#user2 .user-info span:nth-child(2)').text()) < parseInt($('#user1 .user-info span:nth-child(2)').text())){
+            $('#question').text('Player 1 Wins!');
+        } else if (parseInt($('#user2 .user-info span:nth-child(2)').text()) > parseInt($('#user1 .user-info span:nth-child(2)').text())) {
+            $('#question').text('Player 2 Wins!');
+        } else {
+            $('#question').text('It\'s a tie!');
+        }
+        $('#food-img').attr('src','')
+        
+        finished = true;
+    } else if (json.event == "oppanswer") {
+        $('#user2 .user-info span:nth-child(2)').text(json.score)
     } else {
-        alert(json);
+        alert(evt);
     }
 };
 
 ws.onclose = function () {
-    //alert('dead!');
+    alert('dead!');
+}
+
+function tick(){
+    setTimeout(tock, 1000);
+}
+
+function tock(){
+    timeleft -= 1;
+    $('#timer').text(timeleft);
+    if (timeleft <= 0){
+        if(playernum == 1){
+            ws.send(JSON.stringify({"event":"signalendround","gamenum":gamenum, "playernum":playernum, "roundnum":roundnum}))
+        }
+        $('#anslist').empty();
+        timer =  false
+        return;
+    } else {
+        tick();
+    }
+}
+
+function setupTimer(){
+    if (timer == false){
+        timer = true;
+        timeleft = 20;
+        $('#timer').text(timeleft);
+        tick()
+    }
+}
+
+function sendfalse(text, i ){
+    ws.send(JSON.stringify({'event':'sendfalse', "gamenum":gamenum, "playernum":playernum, "text":text, "num":i}))
+    $('.ans_'+i).remove();
+}
+    
+function sendtrue(text, i){
+    ws.send(JSON.stringify({'event':'sendtrue', "gamenum":gamenum, "playernum":playernum, "text":text, "num":i}))
+    $('.ans_'+i).remove();
 }
 
 </script>
@@ -222,11 +290,11 @@ ws.onclose = function () {
 <img id="food-img" />
 
 <div class="list-group" id="anslist">
-    <span class="list-group-item ansitem">
+    <!--<span class="list-group-item ansitem">
       <span><i class="fa fa-check fa-2x"></i></span>
       <span class="ingredient" id="ingredient_0">Ingredient</span>
       <span><i class="fa fa-times fa-2x"></i></span>
-    </span>
+    </span>-->
 </div>
 
 {% end %}

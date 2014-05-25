@@ -169,6 +169,9 @@ function showInfo(id) {
 {% block content %}
 <div class="navbar navbar-default mynav">
      <a class="navbar-brand" href="/"><img class="nav-logo" src="http://media.tumblr.com/tumblr_lg2g3hhYne1qdrcbv.jpg"> Emo Ice Cream Deluxe</a>
+    <ul class="nav navbar-nav navbar-right">
+      <li>{{username}}</li>
+    </ul>
 </div>
 {% for food in foods %}
         <div class="setbox" onclick="showInfo('{{food['id']}}')" id="{{food['id']}}_box">

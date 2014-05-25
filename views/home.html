@@ -21,17 +21,56 @@
         margin: 0 auto;
     }
     
+    .myform{
+        width: 70%; 
+        margin: 0 auto;
+    }
 
+    
 </style>
 {% end %}
 
 {% block scripts %}
+<script>
+function setCookie(cname,cvalue,exdays)
+{
+var d = new Date();
+d.setTime(d.getTime()+(exdays*24*60*60*1000));
+var expires = "expires="+d.toGMTString();
+document.cookie = cname + "=" + cvalue + "; " + expires;
+}    
+function replaceAll(find, replace, str) {
+  return str.replace(new RegExp(find, 'g'), replace);
+}
 
+function go(){
+    var user = $('#username').val()
+    user = replaceAll('<','&lt;',user)
+    user = replaceAll('>','&gt;', user)
+    user = replaceAll('"','&#34;', user)
+    user = replaceAll("'",'&#39;', user);
+    if (user == ''){
+        user = "Guest";   
+    }
+    console.log(user)
+    
+    setCookie('username',user,90);
+    
+    document.location = "play"
+}
+
+</script>
 {% end %}
 
 {% block content %}
 <img class="logo" src="http://media.tumblr.com/tumblr_lg2g3hhYne1qdrcbv.jpg" align="middle">
 <h1 class="title">Emo Ice Cream Deluxe</h1><br>
-<a href="play"><button class="btn btn-default btn-lg btn-block play">Play Now!</button></a>
-
+<div class="form-group myform">
+  <div class="input-group">
+    <input type="text" id="username" class="form-control" placeholder="Username...">
+    <span class="input-group-btn">
+        <a href="play" onclick="go(); return false;"><button class="btn btn-default" type="button">Play!</button></a>
+    </span>
+  </div>
+</div>
 {% end %}

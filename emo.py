@@ -24,7 +24,8 @@ class IndexHandler(web.RequestHandler):
 
 class PlayHandler(web.RequestHandler):
     def get(self):
-        self.render('views/play.html', title = "Pick Category", foods = foodtypes )
+        username = self.get_cookie("username","Guest")
+        self.render('views/play.html', title = "Pick Category", foods = foodtypes, username = username )
 
 class GameHandler(web.RequestHandler):
     def get(self):
@@ -37,8 +38,9 @@ class GameHandler(web.RequestHandler):
         if cat not in games:
             client = httpclient.HTTPClient()
             data = client.fetch('https://api.pearson.com/kitchen-manager/v1/recipes?limit=100&cuisine='+cat)
+            print(data.body)
             myjson = json.loads(data.body.decode())
-            print(myjson)
+            print('myjson',myjson)
             games[cat] = {"rooms":[], "recipes": myjson['results']}
             print(games)
 
@@ -49,20 +51,20 @@ class SocketHandler(websocket.WebSocketHandler):
     def makeRound(self):
         details=self.get_argument("c") #Get Card ID
         rec = games[details]['recipes']
-        print(len(rec))
-        trep = random.randint(0, len(rec) - 1)
-        totaling = rec[trep]['ingredients']
+        print('rec!',rec, len(rec))
+        print(games)
+        trep = random.randrange(0, len(rec) - 1)
+        totaling = []
+        totaling.extend(rec[trep]['ingredients'])
         ing2 = rec[random.randint(0, len(rec) - 1)]['ingredients']
-        ing3 = rec[random.randint(0, len(rec) - 1)]['ingredients']
+        #ing3 = rec[random.randint(0, len(rec) - 1)]['ingredients']
 
         for i in ing2:
             if i not in totaling:
                 totaling.append(i)
 
-        for i in ing3:
-            if i not in totaling:
-                totaling.append(i)
-
+        random.shuffle(totaling)
+        #ToDo: Extract only needed info out of recipe
         return {'recipe':rec[trep], 'inglist':totaling}
 
 
@@ -95,7 +97,7 @@ class SocketHandler(websocket.WebSocketHandler):
         print(games[details]["rooms"])
         if joined == False or i == 0: #Create the first game or a new game.
             print('here 4')
-            games[details]["rooms"].append({"players":{"player1":{"socket": self, "score": 0, "right":[], "wrong": ""}}})
+            games[details]["rooms"].append({"players":{"player1":{"socket": self, "score": 0, "right":[], "wrong": []}}, "finished":[]})
             self.write_message('{"event":"youjoin", "data":{"playernum": 1, "gamenum": '+str(i)+'}}')
 
 
@@ -125,15 +127,90 @@ class SocketHandler(websocket.WebSocketHandler):
             oppinfo['socket'].write_message('{"event":"oppinfo", "data":{"username": "'+playerinfo['username']+'" }}')
             print('Sent!')
 
+
             round = self.makeRound()
             game['currentround'] = round
 
             self.write_message('{"event":"startgame", "data" : {"roundnum": 0, "set": '+json.dumps(round)+'}}')
             oppinfo['socket'].write_message('{"event":"startgame", "data" : {"roundnum": 0, "set": '+json.dumps(round)+'}}')
-            
 
-        elif msgjson['event'] == '':
-            pass
+
+        elif msgjson['event'] == 'sendfalse':
+            game = games[details]['rooms'][msgjson['gamenum']]
+            me = game['players']['player'+str(msgjson['playernum'])]
+            print(msgjson['text'], game['currentround']['recipe']['ingredients'])
+            if msgjson['text'] not in game['currentround']['recipe']['ingredients']:
+                print('right!')
+                me['score'] += 5
+                me['right'].append(msgjson['text'])
+
+                self.write_message('{"event":"youanswer", "correct":true, "score":'+str(me['score'])+', "text": "'+msgjson['text']+'", "num":"'+str(msgjson['num'])+'"}')
+
+                if msgjson['playernum'] == 1:
+                    game['players']['player2']['socket'].write_message('{"event":"oppanswer", "correct":true, "score":'+str(me['score'])+', "text": "'+msgjson['text']+'", "num":"'+str(msgjson['num'])+'"}')
+                else:
+                    game['players']['player1']['socket'].write_message('{"event":"oppanswer", "correct":true, "score":'+str(me['score'])+', "text": "'+msgjson['text']+'", "num":"'+str(msgjson['num'])+'"}')
+
+
+            else:
+                print('wrong')
+                me['score'] -= 5
+                me['wrong'].append(msgjson['text'])
+
+                self.write_message('{"event":"youanswer", "correct":false, "score":'+str(me['score'])+', "text": "'+msgjson['text']+'", "num":"'+str(msgjson['num'])+'"}')
+                if msgjson['playernum'] == 1:
+                    game['players']['player2']['socket'].write_message('{"event":"oppanswer", "correct":false, "score":'+str(me['score'])+', "text": "'+msgjson['text']+'", "num":"'+str(msgjson['num'])+'"}')
+                else:
+                    game['players']['player1']['socket'].write_message('{"event":"oppanswer", "correct":false, "score":'+str(me['score'])+', "text": "'+msgjson['text']+'", "num":"'+str(msgjson['num'])+'"}')
+
+
+        elif msgjson['event'] == 'sendtrue':
+            game = games[details]['rooms'][msgjson['gamenum']]
+            me = game['players']['player'+str(msgjson['playernum'])]
+            print(msgjson['text'], game['currentround']['recipe']['ingredients'])
+            if msgjson['text'] in game['currentround']['recipe']['ingredients']:
+                print('right!')
+                me['score'] += 5
+                me['right'].append(msgjson['text'])
+
+                self.write_message('{"event":"youanswer", "correct":true, "score":'+str(me['score'])+', "text": "'+msgjson['text']+'", "num":"'+str(msgjson['num'])+'"}')
+
+                if msgjson['playernum'] == 1:
+                    game['players']['player2']['socket'].write_message('{"event":"oppanswer", "correct":true, "score":'+str(me['score'])+', "text": "'+msgjson['text']+'", "num":"'+str(msgjson['num'])+'"}')
+                else:
+                    game['players']['player1']['socket'].write_message('{"event":"oppanswer", "correct":true, "score":'+str(me['score'])+', "text": "'+msgjson['text']+'", "num":"'+str(msgjson['num'])+'"}')
+
+
+            else:
+                print('wrong')
+                me['score'] -= 5
+                me['wrong'].append(msgjson['text'])
+
+                self.write_message('{"event":"youanswer", "correct":false, "score":'+str(me['score'])+', "text": "'+msgjson['text']+'", "num":"'+str(msgjson['num'])+'"}')
+                if msgjson['playernum'] == 1:
+                    game['players']['player2']['socket'].write_message('{"event":"oppanswer", "correct":false, "score":'+str(me['score'])+', "text": "'+msgjson['text']+'", "num":"'+str(msgjson['num'])+'"}')
+                else:
+                    game['players']['player1']['socket'].write_message('{"event":"oppanswer", "correct":false, "score":'+str(me['score'])+', "text": "'+msgjson['text']+'", "num":"'+str(msgjson['num'])+'"}')
+        elif msgjson['event'] == 'vardump':
+            print(games)
+
+        elif msgjson['event'] == 'signalendround':
+
+                players = games[details]['rooms'][msgjson['gamenum']]['players']
+                game = games[details]['rooms'][msgjson['gamenum']]
+                #Start new round
+                round = self.makeRound()
+                game['currentround'] = round
+                finished = []
+
+                if msgjson['roundnum'] < 4:
+                    players['player1']['socket'].write_message('{"event":"startgame", "data" : {"roundnum": '+str(msgjson['roundnum']+ 1 )+', "set": '+json.dumps(round)+'}}')
+                    players['player2']['socket'].write_message('{"event":"startgame", "data" : {"roundnum": '+str(msgjson['roundnum']+ 1 )+', "set": '+json.dumps(round)+'}}')
+                else:
+                    players['player1']['socket'].write_message('{"event":"finishgame"}')
+                    players['player2']['socket'].write_message('{"event":"finishgame"}')
+
+
 
     def on_close(self):
         details=self.get_argument("c")
