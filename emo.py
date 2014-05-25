@@ -10,8 +10,8 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits): #Generat
 
 
 #Food Categories:
-foodtypes = [{"n":"American","id":"american"},{"n":"American: Southern","id":"american-southern"},{"n":"Asian","id":"asian"},{"n":"French","id":"french"},{"n":"Indian","id":"indian"},{"n":"Italian","id":"italian"},{"n":"Mexican","id":"mexican"},{"n":"Other","id":"n-a"}]
-foodlist = ['american', 'american-southern', 'asian', 'french', 'indian', 'italian', 'mexican', 'n-a']
+foodtypes = [{"n":"American","id":"american"},{"n":"Asian","id":"asian"},{"n":"French","id":"french"},{"n":"Indian","id":"indian"},{"n":"Italian","id":"italian"},{"n":"Mexican","id":"mexican"}]
+foodlist = ['american', 'asian', 'french', 'indian', 'italian', 'mexican']
 
 #Games Data:
 games = {}
@@ -44,7 +44,8 @@ class GameHandler(web.RequestHandler):
             games[cat] = {"rooms":[], "recipes": myjson['results']}
             print(games)
 
-        self.render('views/game.html', title = "Play Game", cid = cat)
+        username = self.get_cookie("username","Guest")
+        self.render('views/game.html', title = "Play Game", cid = cat, username = username)
 
 
 class SocketHandler(websocket.WebSocketHandler):

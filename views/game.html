@@ -127,6 +127,7 @@
         float: left;
         color: green;
         margin-left: 5px;
+        cursor: pointer;
     }
     
     .ansitem span:nth-child(2){
@@ -138,6 +139,7 @@
         float: right;
         color: red;
         margin-right: 5px;
+        cursor: pointer;
     }
 </style>
 {% end%}
@@ -145,7 +147,7 @@
 {% block scripts %} 
 <script>
 var cid = "{{cid}}"
-var username = "Guest"
+var username = "{{username}}"
 var gamenum, playernum, timeleft, roundnum
 var timer = false;
 var finished = false;
@@ -204,13 +206,12 @@ ws.onmessage = function (evt) {
         }*/
     } else if (json.event == "finishgame") {
         if(parseInt($('#user2 .user-info span:nth-child(2)').text()) < parseInt($('#user1 .user-info span:nth-child(2)').text())){
-            $('#question').text('Player 1 Wins!');
-        } else if (parseInt($('#user2 .user-info span:nth-child(2)').text()) > parseInt($('#user1 .user-info span:nth-child(2)').text())) {
-            $('#question').text('Player 2 Wins!');
+            $('#question').text($('#user1 .user-info span:nth-child(1)').text() + ' Wins!');
+        } else if (parseInt($('#user2 .user-info span:nth-child(2)').text()) > parseInt($('#user1 .user-info span:nth-child(2)').text())) {             $('#question').text($('#user2 .user-info span:nth-child(1)').text()+' Wins!');
         } else {
             $('#question').text('It\'s a tie!');
         }
-        $('#food-img').attr('src','')
+        $('#food-img').attr('src','http://www.valleystreamsoccerclub.com/imgs/Trophies/trophy.gif')
         
         finished = true;
     } else if (json.event == "oppanswer") {
@@ -270,7 +271,7 @@ function sendtrue(text, i){
 <div id="header">
     <div id="user1" class="user">
         <div class="user-info">
-            <span>Username</span>
+            <span>{{username}}</span>
             <span>0</span>
         </div>
     </div>

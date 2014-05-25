@@ -67,8 +67,14 @@
         margin-top: 0 7%;
         display: inline-block;
         color: black;
+    }
+    
+    .active{
         cursor: pointer;
-
+    }
+    .deactive{
+        color: grey !important;
+        cursor: default !important;
     }
 
     .sethidden div:nth-child(1){
@@ -114,7 +120,7 @@
         } 
     }
 
-    .sethidden div:hover{
+    .sethidden div.active:hover{
         -webkit-box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.85);
         -moz-box-shadow:    0px 8px 16px 0px rgba(0, 0, 0, 0.85);
         box-shadow:         0px 8px 16px 0px rgba(0, 0, 0, 0.85);   
@@ -145,6 +151,11 @@
         right: 0;
         width: 100%;
     }
+    
+    .user-display{
+        float: right;
+        margin-right: 20px;
+    }
 </style>
 {% end %}
 
@@ -162,16 +173,14 @@ function showInfo(id) {
         ele.removeClass('unsetrotated');
         //Rotate   
     }
-}    
+}
 </script>
 {% end %}
 
 {% block content %}
 <div class="navbar navbar-default mynav">
      <a class="navbar-brand" href="/"><img class="nav-logo" src="http://media.tumblr.com/tumblr_lg2g3hhYne1qdrcbv.jpg"> Emo Ice Cream Deluxe</a>
-    <ul class="nav navbar-nav navbar-right">
-      <li>{{username}}</li>
-    </ul>
+    <span class="user-display navbar-brand">Logged in as {{username}}.</span>
 </div>
 {% for food in foods %}
         <div class="setbox" onclick="showInfo('{{food['id']}}')" id="{{food['id']}}_box">
@@ -186,10 +195,10 @@ function showInfo(id) {
         </div>
         <div class="sethidden" id="{{food['id']}}_info">
             <a href="game?c={{food['id']}}">
-                <div>Play Against Random</div>
+                <div class="active">Play Against Random</div>
             </a>
-            <a href="challange?c={{food['id']}}">
-                <div>Challange A Friend</div>
+            <a href="#{{food['id']}}">
+                <div class="deactive">Challange A Friend</div>
             </a>
         </div>
 {% end %}
