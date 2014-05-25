@@ -1,0 +1,193 @@
+{% extends 'template.html' %}
+
+{% block style %}
+<style>
+    .setbox{
+        /*height: 13%;*/
+        height: 78px;
+        padding: 10px 0;
+        width: 73%;
+        -webkit-border-radius: 10px/11px;
+        -moz-border-radius: 10px/11px;
+        border-radius: 10px/11px;
+        background-color: #ebebeb;   
+        margin: 0px auto;
+        margin-top: 2.5%;
+        padding-left: 3%;
+        position: relative;
+
+        cursor: pointer;
+    }
+
+    .setbox:hover{
+        -webkit-box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.85);
+        -moz-box-shadow:    0px 8px 16px 0px rgba(0, 0, 0, 0.85);
+        box-shadow:         0px 8px 16px 0px rgba(0, 0, 0, 0.85);   
+    }
+
+
+
+    .settitle{
+
+        margin-top: 0;
+        font-family: "Arial Black", Arial, sans-serif;
+        font-size: 30px;
+        color: black;
+    }
+    .setnum{
+        font-family: "Lato";
+        color: #646464;
+    }
+
+    .sethidden{
+        padding-top: 10px;
+        text-align: center;
+        width: 60%;
+        height: 58.5px;
+        margin: 0 auto;
+        border-bottom-left-radius: 11px;
+        border-bottom-right-radius: 11px;
+        background-color: rgba(0, 0, 0, 0.6);
+        border: 1px solid black;
+
+        display: none;
+    }
+
+
+
+    .sethidden div{
+        height: 70%;
+        width: 40%;
+        font-size: 18px;
+        font-family: "Lato", Arial, sans-serif;
+        -webkit-border-radius: 5px/6px;
+        -moz-border-radius: 5px/6px;
+        border-radius: 5px/6px;
+        background-color: #ebebeb;  
+        margin-top: 0 7%;
+        display: inline-block;
+        color: black;
+        cursor: pointer;
+
+    }
+
+    .sethidden div:nth-child(1){
+        margin-right: 1.5%;   
+    }
+
+    .sethidden div:nth-child(2){
+        margin-left: 1.5%;   
+    }
+
+    .setrotated{
+        -webkit-animation-name: setspin; 
+        -webkit-animation-iteration-count: 1; 
+        -webkit-animation-timing-function: linear;
+        -webkit-animation-duration: 0.4s;
+        -webkit-transform: rotate(180deg);
+    }
+
+    @-webkit-keyframes setspin {  
+    from {  
+        -webkit-transform: rotate(0deg);  
+    }  
+    to {  
+        -webkit-transform: rotate(180deg);  
+        } 
+    }
+
+
+    .unsetrotated{
+        -webkit-animation-name: unsetspin; 
+        -webkit-animation-iteration-count: 1; 
+        -webkit-animation-timing-function: linear;
+        -webkit-animation-duration: 0.4s;
+        -webkit-transform: rotate(0deg);
+    }
+
+    @-webkit-keyframes unsetspin {  
+    from {  
+        -webkit-transform: rotate(180deg);  
+    }  
+    to {  
+        -webkit-transform: rotate(0deg);  
+        } 
+    }
+
+    .sethidden div:hover{
+        -webkit-box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.85);
+        -moz-box-shadow:    0px 8px 16px 0px rgba(0, 0, 0, 0.85);
+        box-shadow:         0px 8px 16px 0px rgba(0, 0, 0, 0.85);   
+    }
+
+
+    .setright{
+        display: inline-block;
+        position: absolute;
+        right: 15px;
+        top: 20%; 
+    }
+    
+    .nav-logo{
+        height:100%;
+        margin-top: -7.5px;
+    }
+    
+    body{
+        padding-bottom: 20px;
+        padding-top: 60px;
+    }
+    
+    .mynav{
+        z-index: 100;
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 100%;
+    }
+</style>
+{% end %}
+
+{% block scripts %}
+<script>
+function showInfo(id) {
+    $('#' + id + '_info').slideToggle(400);
+    var ele = $('#'+id+'_box .setright i');
+    if (ele.hasClass('setrotated')) {
+        ele.removeClass('setrotated');
+        ele.addClass('unsetrotated');
+        //Unrotate
+    } else {
+        ele.addClass('setrotated');
+        ele.removeClass('unsetrotated');
+        //Rotate   
+    }
+}    
+</script>
+{% end %}
+
+{% block content %}
+<div class="navbar navbar-default mynav">
+     <a class="navbar-brand" href="/"><img class="nav-logo" src="http://media.tumblr.com/tumblr_lg2g3hhYne1qdrcbv.jpg"> Emo Ice Cream Deluxe</a>
+</div>
+{% for food in foods %}
+        <div class="setbox" onclick="showInfo('{{food['id']}}')" id="{{food['id']}}_box">
+            <div class="settext">
+                <span class="settitle">{{food['n']}}</span>
+                <br>
+                <span class="setnum"></span>
+            </div>
+            <span class="setright">
+                <i class="fa fa-arrow-circle-o-down fa-3x"></i>
+            </span>
+        </div>
+        <div class="sethidden" id="{{food['id']}}_info">
+            <a href="game?c={{food['id']}}">
+                <div>Play Against Random</div>
+            </a>
+            <a href="challange?c={{food['id']}}">
+                <div>Challange A Friend</div>
+            </a>
+        </div>
+{% end %}
+{% end %}

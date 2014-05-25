@@ -1,0 +1,222 @@
+{% extends 'template.html' %}
+
+{% block style %}
+<style>
+    #header{
+        height: 8.7%;
+        width: 100%;
+       /*text-align:center;*/
+    }
+    
+    .user{
+        height: 100%;
+        margin: 1em 0;
+        margin-top: 0;
+        display: inline-block;
+    }
+    
+    .user div{
+        display: inline-block;
+        height: 100%;
+    }
+    
+    .user div:nth-child(1){
+        position: relative;
+    }
+    
+    .user img{
+        bottom: 5;
+        margin-left: 5px;
+        margin-right: 5px;
+        margin-top: 10%;
+        height: 78%;
+        width: 50px;
+        -webkit-border-radius: 16px;
+        border-radius: 16px;
+        background: gray;
+        border: 2px solid #fff;
+    }
+    
+    .user-info span{
+        display: block;
+    }
+    
+    
+    .user-info span:nth-child(1){
+        color: black;
+        font-size: 20px;
+    
+    }
+    
+    .user-info span:nth-child(2){
+        display: block;
+        font-size: 32px;
+        margin-bottom: 5px;
+    }
+    
+    
+    
+    #user1 .user-info span:nth-child(2){
+        color: green;
+    }
+    
+    #user2 .user-info span:nth-child(2){
+        color: red;
+    }
+    
+    .imghelper {
+        display: inline-block;
+        height: 100%;
+        vertical-align: middle;
+    }
+    
+    #user1{
+        float: left;
+        text-align:left;
+        margin-left: 20px;
+    }
+    
+    #user2{
+        margin-right: 20px;
+        float: right;
+        text-align: right;
+    }
+    
+    #timer{
+        position: absolute;
+        margin-left: auto;
+        margin-right: auto;
+        left: 0;
+        right: 0;
+        top: 15px;
+        font-size: 36px;
+        color: black;
+        text-align:center;
+        display:inline-block;
+    }
+    
+    #question{
+        color: black;
+        font-size: 2em;
+        text-align: center;
+    }
+    
+    #food-img{
+        width: 300px; 
+        height: 300px;
+        margin: 0 auto;
+        display: block;
+        margin-top: 10px;
+    }
+    
+    #anslist{
+        width: 80%;
+        height-min: 200px;
+        height: 31%;
+        overflow-y: scroll;
+        margin: 0 auto;
+        margin-top: 20px;
+    }
+    
+    .ansitem{
+        text-align: center;
+    }
+    
+    .ansitem span:nth-child(1){
+        float: left;
+        color: green;
+        margin-left: 5px;
+    }
+    
+    .ansitem span:nth-child(2){
+        display: inline-block;
+        
+    }
+    
+    .ansitem span:nth-child(3){
+        float: right;
+        color: red;
+        margin-right: 5px;
+    }
+</style>
+{% end%}
+
+{% block scripts %} 
+<script>
+var cid = "{{cid}}"
+var username = "Guest"
+var gamenum, playernum    
+
+var ws = new WebSocket("ws://localhost:9008/ws?c=" + cid);
+ws.onopen = function () {
+    console.log('In!')
+};
+ws.onmessage = function (evt) {
+    console.log(evt.data)
+    
+    var json = JSON.parse(evt.data)
+    
+    if (json.event == "youjoin"){
+        console.log('Here!')
+        gamenum = json.data.gamenum
+        playernum = json.data.playernum
+        ws.send(JSON.stringify({"event":"userinfo", "gamenum":gamenum, "playernum":playernum, "data": {"username":username}}))
+    } else if (json.event == "oppinfo") {
+        $('#user2 div.user-info span:nth-child(1)').text(json.data.username)
+        $('#user2 div.user-img img').attr('src', json.data.userpic)
+        
+    } else if (json.event == "startgame"){
+        $('#question').text('Starting Game...');
+        setTimeout(function(){
+                
+        }, 3000)
+        
+    } else if (json.event == "oppleft"){
+        $('#user2 div.user-info span:nth-child(1)').text('Disconnected...')
+        $('#user2 div.user-img img').attr('src', '') //Replace with defualt picture
+        
+    } else {
+        alert(json);
+    }
+};
+
+ws.onclose = function () {
+    //alert('dead!');
+}
+
+</script>
+{% end %}
+
+{% block content %}
+
+<div id="header">
+    <div id="user1" class="user">
+        <div class="user-info">
+            <span>Username</span>
+            <span>0</span>
+        </div>
+    </div>
+    <span id="timer">0</span>
+    <div id="user2" class="user">
+        <div class="user-info">
+            <span>Connecting...</span>
+            <span>0</span>
+        </div>
+    </div>
+</div>
+
+<hr>
+
+<div id="question">What are the ingrediants of <span id="food-name">Food Name</span>?</div>
+
+<img id="food-img" />
+
+<div class="list-group" id="anslist">
+    <span class="list-group-item ansitem">
+      <span><i class="fa fa-check fa-2x"></i></span>
+      <span class="ingredient" id="ingredient_0">Ingredient</span>
+      <span><i class="fa fa-times fa-2x"></i></span>
+    </span>
+</div>
+
+{% end %}

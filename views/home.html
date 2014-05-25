@@ -1,0 +1,37 @@
+{% extends 'template.html' %}
+
+{% block style %}
+<style>
+    body{
+        padding-top: 30px;   
+    }
+    .title{
+        text-align: center;
+        font-size: 5em;
+    }
+    
+    .logo{
+        display: block;
+        width: 300px;
+        margin: 0 auto;   
+    }
+    
+    .play{
+        width: 50%;
+        margin: 0 auto;
+    }
+    
+
+</style>
+{% end %}
+
+{% block scripts %}
+
+{% end %}
+
+{% block content %}
+<img class="logo" src="http://media.tumblr.com/tumblr_lg2g3hhYne1qdrcbv.jpg" align="middle">
+<h1 class="title">Emo Ice Cream Deluxe</h1><br>
+<a href="play"><button class="btn btn-default btn-lg btn-block play">Play Now!</button></a>
+
+{% end %}

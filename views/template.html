@@ -1,0 +1,18 @@
+<DOCTYPE html>
+<html>
+<head>
+	<title>{{ title }}</title>
+	{# blocks enable the outer script to inject code into the page #}
+	<link rel="stylesheet" type="text/css" href="public/stylesheets/Lumen.css">
+	
+	<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+	<script type="text/javascript" src="public/javascripts/bootstrap.js"></script>
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+	{% block style %} {% end %}
+	{% block scripts %} {% end %}
+
+</head>
+<body>
+	{% block content %} {% end %}
+</body>
+</html>
