@@ -152,7 +152,7 @@ var gamenum, playernum, timeleft, roundnum
 var timer = false;
 var finished = false;
 
-var ws = new WebSocket("ws:/192.168.1.35:9008/ws?c=" + cid);
+var ws = new WebSocket("ws:/localhost:9008/ws?c=" + cid);
 ws.onopen = function () {
     console.log('In!')
 };
@@ -172,7 +172,7 @@ ws.onmessage = function (evt) {
         
     } else if (json.event == "startgame"){
         roundnum = json.data.roundnum;
-        $('#question').text('Round '+(json.data.roundnum + 1) + ':');
+        $('#question').text('Round '+(json.data.roundnum + 1) + '/5:');
         setTimeout(function(){
             $('#question').text(json.data.set.recipe.name + ':');
             $('#food-img').attr('src', json.data.set.recipe.image);
@@ -222,7 +222,8 @@ ws.onmessage = function (evt) {
 };
 
 ws.onclose = function () {
-    alert('dead!');
+    $('#user2 div.user-info span:nth-child(1)').text('Disconnected...');
+    $('#user1 div.user-info span:nth-child(1)').text('Disconnected...');
 }
 
 function tick(){
@@ -255,12 +256,12 @@ function setupTimer(){
 
 function sendfalse(text, i ){
     ws.send(JSON.stringify({'event':'sendfalse', "gamenum":gamenum, "playernum":playernum, "text":text, "num":i}))
-    $('.ans_'+i).remove();
+    $('.ans_'+i).slideUp();
 }
     
 function sendtrue(text, i){
     ws.send(JSON.stringify({'event':'sendtrue', "gamenum":gamenum, "playernum":playernum, "text":text, "num":i}))
-    $('.ans_'+i).remove();
+    $('.ans_'+i).slideUp();
 }
 
 </script>
@@ -278,7 +279,7 @@ function sendtrue(text, i){
     <span id="timer">0</span>
     <div id="user2" class="user">
         <div class="user-info">
-            <span>Connecting...</span>
+            <span>Connecting... (<a href="#" onclick="window.open(document.URL, '_blank'); return false;">self</a>)</span>
             <span>0</span>
         </div>
     </div>

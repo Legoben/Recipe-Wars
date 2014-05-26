@@ -25,7 +25,14 @@
         width: 70%; 
         margin: 0 auto;
     }
-
+    
+    #footer{
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        margin: 0;
+    }
     
 </style>
 {% end %}
@@ -64,7 +71,7 @@ function go(){
 
 {% block content %}
 <img class="logo" src="http://media.tumblr.com/tumblr_lg2g3hhYne1qdrcbv.jpg" align="middle">
-<h1 class="title">Emo Ice Cream Deluxe</h1><br>
+<h1 class="title">Recipe Wars</h1><br>
 <div class="form-group myform">
   <div class="input-group">
     <input type="text" id="username" class="form-control" placeholder="Username...">
@@ -72,5 +79,9 @@ function go(){
         <a href="play" onclick="go(); return false;"><button class="btn btn-default" type="button">Play!</button></a>
     </span>
   </div>
+</div>
+
+<div id="footer" class="navbar navbar-default">
+    <span class="navbar-brand">Created at <a href="http://codeday.org/">CodeDay</a> in 24 hours by <a href="http://helloben.co/">Ben Stobaugh</a>. Recipes come from <a href="https://developer.pearson.com/">Pearson</a>.</span>
 </div>
 {% end %}
